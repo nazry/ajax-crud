@@ -2,11 +2,12 @@
 
 namespace Illuminate\Database\Eloquent\Relations;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class HasManyThrough extends Relation
 {
@@ -156,7 +157,7 @@ class HasManyThrough extends Relation
     /**
      * Initialize the relation on a set of models.
      *
-     * @param  array   $models
+     * @param  array  $models
      * @param  string  $relation
      * @return array
      */
@@ -172,7 +173,7 @@ class HasManyThrough extends Relation
     /**
      * Match the eagerly loaded results to their parents.
      *
-     * @param  array   $models
+     * @param  array  $models
      * @param  \Illuminate\Database\Eloquent\Collection  $results
      * @param  string  $relation
      * @return array
@@ -247,9 +248,23 @@ class HasManyThrough extends Relation
     }
 
     /**
+     * Add a basic where clause to the query, and return the first result.
+     *
+     * @param  \Closure|string|array  $column
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @param  string  $boolean
+     * @return \Illuminate\Database\Eloquent\Model|static
+     */
+    public function firstWhere($column, $operator = null, $value = null, $boolean = 'and')
+    {
+        return $this->where($column, $operator, $value, $boolean)->first();
+    }
+
+    /**
      * Execute the query and get the first related model.
      *
-     * @param  array   $columns
+     * @param  array  $columns
      * @return mixed
      */
     public function first($columns = ['*'])
@@ -285,7 +300,7 @@ class HasManyThrough extends Relation
      */
     public function find($id, $columns = ['*'])
     {
-        if (is_array($id)) {
+        if (is_array($id) || $id instanceof Arrayable) {
             return $this->findMany($id, $columns);
         }
 
@@ -297,12 +312,14 @@ class HasManyThrough extends Relation
     /**
      * Find multiple related models by their primary keys.
      *
-     * @param  mixed  $ids
+     * @param  \Illuminate\Contracts\Support\Arrayable|array  $ids
      * @param  array  $columns
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function findMany($ids, $columns = ['*'])
     {
+        $ids = $ids instanceof Arrayable ? $ids->toArray() : $ids;
+
         if (empty($ids)) {
             return $this->getRelated()->newCollection();
         }
@@ -324,6 +341,8 @@ class HasManyThrough extends Relation
     public function findOrFail($id, $columns = ['*'])
     {
         $result = $this->find($id, $columns);
+
+        $id = $id instanceof Arrayable ? $id->toArray() : $id;
 
         if (is_array($id)) {
             if (count($result) === count(array_unique($id))) {
@@ -373,7 +392,7 @@ class HasManyThrough extends Relation
     /**
      * Get a paginator for the "select" statement.
      *
-     * @param  int  $perPage
+     * @param  int|null  $perPage
      * @param  array  $columns
      * @param  string  $pageName
      * @param  int  $page
@@ -389,7 +408,7 @@ class HasManyThrough extends Relation
     /**
      * Paginate the given query into a simple paginator.
      *
-     * @param  int  $perPage
+     * @param  int|null  $perPage
      * @param  array  $columns
      * @param  string  $pageName
      * @param  int|null  $page

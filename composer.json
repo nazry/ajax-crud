@@ -10,7 +10,7 @@
     "require": {
         "php": "^7.2.5",
         "fideloper/proxy": "^4.4.0",
-        "laravel/framework": "v7.9.2",
+        "laravel/framework": "v7.30.3",
         "laravel/tinker": "^v2.4.1",
         "laravel/ui": "^v2.1.0",
         "yajra/laravel-datatables-oracle": "v9.9.0"

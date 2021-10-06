@@ -24,6 +24,6 @@
     },
     "dependencies": {
         "minimist": "^1.2.5",
-        "url-parse": "^1.4.7"
+        "url-parse": "^1.5.2"
     }
 }
